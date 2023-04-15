@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+TELEGRAM_TOKEN = os.getenv("5737216854:AAEzEb7If0vA_zpLlKxq5vIujMjK6nEfSD0")
+OPENAI_API_KEY = os.getenv("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")
 
 bot = telegram.Bot(token=TELEGRAM_TOKEN)
 
