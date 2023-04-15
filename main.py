@@ -1,38 +1,46 @@
 import telegram
+import os
 import openai
+from dotenv import load_dotenv
 
-# Set up the Telegram bot
-bot = telegram.Bot(token="5737216854:AAEzEb7If0vA_zpLlKxq5vIujMjK6nEfSD0")
+load_dotenv()
 
-# Set up OpenAI API
-openai.api_key = "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"
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-# Define a function to handle incoming messages
-def handle_message(update, context):
-    message_text = update.message.text
-    response_text = get_response_from_chatgpt(message_text)
-    update.message.reply_text("bot: "+response_text)
+bot = telegram.Bot(token=TELEGRAM_TOKEN)
 
-# Define a function to get a response from ChatGPT
-def get_response_from_chatgpt(prompt):
-    # Send a prompt to ChatGPT and get a response
+def generate_response(message_text, chat_id):
+    # Use the OpenAI API to generate a response based on the message
+    openai.api_key = OPENAI_API_KEY
     response = openai.Completion.create(
         engine="davinci",
-        prompt=prompt,
-        max_tokens=100
+        prompt=message_text,
+        max_tokens=1024,
+        n=1,
+        stop=None,
+        temperature=0.7,
     )
-    response_text = response.choices[0].text.strip()
-    return response_text
+    message_response = response.choices[0].text.strip()
+    if message_response == "":
+        message_response = "I'm sorry, I don't have a response for that."
 
-# Set up a handler for incoming messages
-message_handler = telegram.ext.MessageHandler(
-    telegram.ext.Filters.text, handle_message)
+    # Use the Telegram API to send the response to the user
+    bot.send_message(chat_id=chat_id, text=message_response)
 
-# Set up the dispatcher and add the message handler
-dispatcher = telegram.ext.Dispatcher(bot, None)
-dispatcher.add_handler(message_handler)
+def lambda_handler(event, context):
+    # Retrieve the message sent by the user
+    update = telegram.Update.de_json(event["body"], bot)
+    message_text = update.message.text
+    chat_id = update.message.chat_id
 
-# Start the bot
-bot_updater = telegram.ext.Updater(bot.token, use_context=True)
-bot_updater.dispatcher = dispatcher
-bot_updater.start_polling()
+    # If the user sends the /start command, send a welcome message
+    if message_text == "/start":
+        bot.send_message(chat_id=chat_id, text="Welcome to my chatbot! How can I assist you?")
+
+    # If this is not the /start command, use the previous messages to generate a more relevant response
+    else:
+        chat_history = [message.text for message in bot.history(chat_id=chat_id, limit=5)][::-1]
+        chat_history.append(message_text)
+        prompt = "Conversation history:\n" + "\n".join([f"{i}. {chat_history[i]}" for i in range(len(chat_history)-1)]) + "\n\nUser message:\n" + chat_history[-1] + "\n\nBot response:"
+        generate_response(prompt, chat_id)
