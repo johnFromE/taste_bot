@@ -11,7 +11,7 @@ openai.api_key = "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"
 def handle_message(update, context):
     message_text = update.message.text
     response_text = get_response_from_chatgpt(message_text)
-    update.message.reply_text(response_text)
+    update.message.reply_text("bot: "+response_text)
 
 # Define a function to get a response from ChatGPT
 def get_response_from_chatgpt(prompt):
