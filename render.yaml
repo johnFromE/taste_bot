@@ -1,0 +1,8 @@
+services:
+  - name: telegram-bot
+    env:
+      BOT_TOKEN: "YOUR_BOT_TOKEN"
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python main.py"
+    github:
+      branch: main
