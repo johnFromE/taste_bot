@@ -1,8 +1,16 @@
 services:
-  - name: telegram-bot
-    env:
-      BOT_TOKEN: "YOUR_BOT_TOKEN"
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "python main.py"
-    github:
-      branch: main
+- name: chatbot
+  env:
+    TELEGRAM_TOKEN: 5737216854:AAEzEb7If0vA_zpLlKxq5vIujMjK6nEfSD0
+    OPENAI_API_KEY: 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
+  buildCommand: pip install -r requirements.txt
+  startCommand: python app.py
+  healthCheckPath: /
+  envVars:
+    - key: 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
+      name: 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
+      type: plain
+    - key: 5737216854:AAEzEb7If0vA_zpLlKxq5vIujMjK6nEfSD0
+      name: 5737216854:AAEzEb7If0vA_zpLlKxq5vIujMjK6nEfSD0
+      type: plain
+  port: 8080
